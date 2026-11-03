@@ -63,16 +63,27 @@ end
 
 ---Compute the file path relative to Pi's working directory (exported by the
 ---pi-terminal extension as $PI_TERMINAL_CWD). Falls back to nvim's cwd, then
----to the absolute path when the file is outside it.
+---to the absolute path when the file is outside it. Several path
+---combinations are tried: as-given first (a file reached through a symlinked
+---dotfiles path resolves outside the base), then with symlinks resolved on
+---both sides (e.g. macOS /tmp vs /private/tmp), then the mixed combinations.
 ---@param file string absolute path
 ---@return string
 local function relative_file_path(file)
 	local base = os.getenv("PI_TERMINAL_CWD") or vim.fn.getcwd()
-	-- Resolve symlinks on both sides (e.g. macOS /tmp vs /private/tmp) so
-	-- paths that differ only by symlink still compare as relative.
-	local ok, rel = pcall(vim.fs.relpath, vim.fn.resolve(base), vim.fn.resolve(file))
-	if ok and type(rel) == "string" and rel ~= "" then
-		return rel
+	local resolved_base = vim.fn.resolve(base)
+	local resolved_file = vim.fn.resolve(file)
+	local combos = {
+		{ base, file },
+		{ resolved_base, resolved_file },
+		{ resolved_base, file },
+		{ base, resolved_file },
+	}
+	for _, combo in ipairs(combos) do
+		local ok, rel = pcall(vim.fs.relpath, combo[1], combo[2])
+		if ok and type(rel) == "string" and rel ~= "" then
+			return rel
+		end
 	end
 	return file
 end
