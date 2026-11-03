@@ -1,8 +1,8 @@
 # pi-review.nvim
 
-Send review comments from nvim to [pi](https://pi.dev), with file, line, column, and symbol context — while nvim runs inside a pi terminal.
+Send review comments from nvim to [pi](https://pi.dev), with file and line context — while nvim runs inside a pi terminal.
 
-Comments accumulate in pi's input box as you add them (you stay in nvim); when you're done, detach back to pi, edit them if needed, and press Enter to send. Or submit a comment to the model immediately.
+Each comment is appended to pi's input box as you add it (you stay in nvim); when you're done, detach back to pi, edit the accumulated comments there if needed, and press Enter to send. Editing and sending happen in pi — this plugin only collects comments.
 
 ## Requirements
 
@@ -20,9 +20,7 @@ Comments accumulate in pi's input box as you add them (you stay in nvim); when y
 return {
     "ksatarin/pi-review-nvim",
     lazy = false,
-    opts = {
-        item_template = "{relative_file_path}:{line1} (`{symbol}`) comment: {comment}",
-    },
+    opts = {},
 }
 ```
 
@@ -36,17 +34,13 @@ return {
 }
 ```
 
-## Commands and keymaps
+## Command and keymaps
 
 | Keymap | Command | Action |
 |---|---|---|
-| `<leader>pr` | `:PiReview` | Send one comment to the model immediately |
 | `<leader>pa` | `:PiReviewAdd` | Add a comment to pi's input box (stay in nvim) |
-| `<leader>ps` | `:PiReviewSend` | Detach back to pi, where the comments wait in the input box |
-| `<leader>pc` | `:PiReviewClear` | Clear pi's input box |
-| `<leader>pl` | `:PiReviewList` | Preview the nvim queue (queue mode) |
 
-`<leader>pr` and `<leader>pa` accept visual selections (a line range is sent). Keymaps are created unless `create_keymaps = false` is passed to `setup()`.
+`:PiReviewAdd` accepts a visual selection (a line range is sent). Keymaps are created unless `create_keymaps = false` is passed to `setup()`.
 
 ## Configuration
 
@@ -60,25 +54,19 @@ Review comments (2):
 
 | Option | Default | Description |
 |---|---|---|
-| `add_mode` | `"pi-input"` | Where comments accumulate: appended to pi's input box as you add them (`"pi-input"`), or queued in nvim and flushed by `:PiReviewSend` (`"queue"`) |
-| `send_mode` | `"input"` | Queue-mode flush: place the batch in pi's input box (`"input"`) or submit it to the model (`"submit"`) |
 | `include_symbol` | `false` | Append `(symbol \`word\`)` to cursor items (built-in format only, i.e. when `item_template` is nil) |
 | `include_line_text` | `false` | Append `line: \`text\`` to cursor items (built-in format only) |
 | `include_col` | `false` | Include the column in the location (`file:line:col`) (built-in format only) |
-| `single_prefix` | `"Review "` | Prefix on immediate sends (`<leader>pr`) |
 | `batch_header` | `"Review comments ({count}):"` | First line of the batch in pi's input box; `{count}` is replaced with the item count |
 | `item_template` | `nil` | Full format override for single-cursor items; when nil, the built-in format is `{relative_file_path}:{line1} comment: {comment}` plus the `include_*` extras |
 | `item_template_range` | `nil` | Full format override for visual selections; when nil, the built-in format is `{relative_file_path}:{line1}-{line2} comment: {comment}` |
-| `create_keymaps` | `true` | Create the default `<leader>` keymaps in `setup()` |
+| `create_keymaps` | `true` | Create the default `<leader>pa` keymaps in `setup()` |
 
 ```lua
 require("pi-review").setup({
-    add_mode          = "pi-input",
-    send_mode         = "input",
     include_symbol    = false,
     include_line_text = false,
     include_col       = false,
-    single_prefix     = "Review ",
     batch_header      = "Review comments ({count}):",
     item_template     = nil,
     item_template_range = nil,
@@ -88,7 +76,7 @@ require("pi-review").setup({
 
 ### Templates
 
-`item_template` replaces the built-in format for single-cursor items; `item_template_range` does the same for visual selections (defaults to `file:line1-line2 comment: ...`). Placeholders (empty fields render as `""`):
+`item_template` replaces the built-in format for single-cursor items; `item_template_range` does the same for visual selections. Placeholders (empty fields render as `""`):
 
 | Placeholder | Meaning |
 |---|---|
@@ -117,13 +105,13 @@ Review comments (2):
 
 ## How it works
 
-Each comment is written as one newline-terminated line to `$PI_TERMINAL_SOCK`:
+Each comment is written as one newline-terminated JSON line to `$PI_TERMINAL_SOCK`:
 
-- `{"text": "...", "mode": "append", "header": "..."}` — append a numbered item to pi's input box, no detach; `{count}` in the header is replaced with the item count
-- plain text — submit immediately as a user message
-- `{"mode": "focus"}` / `{"mode": "clear"}` — detach back to pi / clear its input box
+```json
+{"text": "<item>", "mode": "append", "header": "Review comments ({count}):"}
+```
 
-Item numbering counts the numbered lines already in pi's input, so it stays correct across sends from pi. Comments added while a passthrough editor has the screen are buffered and applied when it detaches.
+The pi-terminal extension appends it as a numbered item to pi's input box. Item numbering counts the numbered lines already in pi's input, so it stays correct across sends from pi. Comments added while a passthrough editor has the screen are buffered and applied when it detaches.
 
 ## License
 
