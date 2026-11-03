@@ -24,9 +24,9 @@ local M = {}
 local defaults = {
 	add_mode = "pi-input",
 	send_mode = "input",
-	include_symbol = true,
-	include_line_text = true,
-	include_col = true,
+	include_symbol = false,
+	include_line_text = false,
+	include_col = false,
 	single_prefix = "Review ",
 	batch_header = "Review comments ({count}):",
 	item_template = nil,
@@ -129,11 +129,11 @@ local function build_review_text(opts_)
 
 	local location
 	if is_range then
-		location = ("%s:%d-%d"):format(fields.file, fields.line1, fields.line2)
+		location = ("%s:%d-%d"):format(fields.relative_file_path, fields.line1, fields.line2)
 	elseif cfg.include_col then
-		location = ("%s:%d:%d"):format(fields.file, fields.line1, fields.col)
+		location = ("%s:%d:%d"):format(fields.relative_file_path, fields.line1, fields.col)
 	else
-		location = ("%s:%d"):format(fields.file, fields.line1)
+		location = ("%s:%d"):format(fields.relative_file_path, fields.line1)
 	end
 
 	local parts = { location }

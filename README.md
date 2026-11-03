@@ -50,20 +50,38 @@ return {
 
 ## Configuration
 
-All options go through `setup()` (or `vim.g.pi_review` as an alternative):
+All options go through `setup()` (or `vim.g.pi_review` as an alternative). Defaults produce comments with a **relative path, line number, and comment only**:
+
+```
+Review comments (2):
+1. src/app.ts:42 comment: rename this
+2. src/util.ts:7-9 comment: dead code
+```
+
+| Option | Default | Description |
+|---|---|---|
+| `add_mode` | `"pi-input"` | Where comments accumulate: appended to pi's input box as you add them (`"pi-input"`), or queued in nvim and flushed by `:PiReviewSend` (`"queue"`) |
+| `send_mode` | `"input"` | Queue-mode flush: place the batch in pi's input box (`"input"`) or submit it to the model (`"submit"`) |
+| `include_symbol` | `false` | Append `(symbol \`word\`)` to cursor items (built-in format only, i.e. when `item_template` is nil) |
+| `include_line_text` | `false` | Append `line: \`text\`` to cursor items (built-in format only) |
+| `include_col` | `false` | Include the column in the location (`file:line:col`) (built-in format only) |
+| `single_prefix` | `"Review "` | Prefix on immediate sends (`<leader>pr`) |
+| `batch_header` | `"Review comments ({count}):"` | First line of the batch in pi's input box; `{count}` is replaced with the item count |
+| `item_template` | `nil` | Full format override for single-cursor items; when nil, the built-in format is `{relative_file_path}:{line1} comment: {comment}` plus the `include_*` extras |
+| `item_template_range` | `nil` | Full format override for visual selections; when nil, the built-in format is `{relative_file_path}:{line1}-{line2} comment: {comment}` |
+| `create_keymaps` | `true` | Create the default `<leader>` keymaps in `setup()` |
 
 ```lua
 require("pi-review").setup({
-    add_mode          = "pi-input",  -- "pi-input": each Add appends to Pi's input box
-                                    -- "queue": Add accumulates in nvim, Send flushes
-    send_mode         = "input",     -- queue-mode flush: "input" or "submit"
-    include_symbol    = true,        -- "(symbol `word`)"
-    include_line_text = true,        -- "line: `text`" (single-cursor items)
-    include_col       = true,        -- the column in file:line:col
-    single_prefix     = "Review ",   -- prefix on immediate sends
+    add_mode          = "pi-input",
+    send_mode         = "input",
+    include_symbol    = false,
+    include_line_text = false,
+    include_col       = false,
+    single_prefix     = "Review ",
     batch_header      = "Review comments ({count}):",
-    item_template     = nil,         -- full format override, cursor items
-    item_template_range = nil,       -- full format override, visual selections
+    item_template     = nil,
+    item_template_range = nil,
     create_keymaps    = true,
 })
 ```
@@ -82,7 +100,7 @@ require("pi-review").setup({
 | `{line_text}` | cursor line text (selection start in visual mode) |
 | `{comment}` | the comment you typed |
 
-Example:
+Example — adding the symbol back and styling selections differently:
 
 ```lua
 opts = {
