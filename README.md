@@ -6,7 +6,7 @@ Each comment is appended to pi's input box as you add it (you stay in nvim); whe
 
 ## Requirements
 
-- [pi](https://pi.dev) with the **pi-terminal extension** installed (`~/.pi/agent/extensions/pi-terminal`). It exports two environment variables to terminals:
+- [pi](https://pi.dev) with the **[pi-terminal extension](https://github.com/kksat/pi-agent-extensions/tree/master/packages/terminal)** (repo: `kksat/pi-agent-extensions`, package `packages/terminal`). Install it from a checkout with `pi install /path/to/pi-agent-extensions/packages/terminal`, or reference the path in the `extensions` array of `~/.pi/agent/settings.json`. It exports two environment variables to terminals:
   - `PI_TERMINAL_SOCK` — Unix socket to the enclosing pi session
   - `PI_TERMINAL_CWD` — pi's working directory (for relative paths)
 - nvim 0.9+ (uses `vim.fs.relpath`, `vim.json`, `sockconnect`)
@@ -111,7 +111,7 @@ Each comment is written as one newline-terminated JSON line to `$PI_TERMINAL_SOC
 {"text": "<item>", "mode": "append", "header": "Review comments ({count}):"}
 ```
 
-The pi-terminal extension appends it as a numbered item to pi's input box. Item numbering counts the numbered lines already in pi's input, so it stays correct across sends from pi. Comments added while a passthrough editor has the screen are buffered and applied when it detaches.
+The [pi-terminal extension](https://github.com/kksat/pi-agent-extensions/tree/master/packages/terminal) appends it as a numbered item to pi's input box. Item numbering counts the numbered lines already in pi's input, so it stays correct across sends from pi. Comments added while a passthrough editor has the screen are buffered and applied when it detaches.
 
 ## License
 

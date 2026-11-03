@@ -1,10 +1,11 @@
 -- pi-review.nvim — send review comments from nvim to pi.
 --
 -- Requires nvim to be running inside a pi-terminal session (passthrough or
--- overlay) of the pi-terminal extension, which exports $PI_TERMINAL_SOCK
--- (Unix socket to the enclosing pi session) and $PI_TERMINAL_CWD (pi's
--- working directory). Each comment is appended to pi's input box as you add
--- it; editing and sending happens in pi.
+-- overlay) of the pi-terminal extension
+-- (https://github.com/kksat/pi-agent-extensions, packages/terminal), which
+-- exports $PI_TERMINAL_SOCK (Unix socket to the enclosing pi session) and
+-- $PI_TERMINAL_CWD (pi's working directory). Each comment is appended to
+-- pi's input box as you add it; editing and sending happens in pi.
 
 local M = {}
 
