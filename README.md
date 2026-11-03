@@ -18,7 +18,7 @@ Each comment is appended to pi's input box as you add it (you stay in nvim); whe
 ```lua
 -- lua/plugins/pi-review.lua
 return {
-    "ksatarin/pi-review-nvim",
+    "kksat/pi-review-nvim",
     lazy = false,
     opts = {},
 }
